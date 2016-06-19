@@ -1,6 +1,7 @@
 'use strict';
 
 (function() {
+	//request data to be passed into the httpRequest function
 	var requestData = {
 		type: 'GET',
 		url: 'https://api.twitch.tv/kraken/search/streams?q=starcraft'
@@ -28,13 +29,22 @@
 		return requestPromise;
 	}
 
+	//initializes the app and sets up the events
 	window.addEventListener('load', function() {
-		httpRequest(requestData.type, requestData.url).then(function(response){
-			console.log(response);
-		}, function (err) {
-			console.log(err);
-		});
-	}, false)
+		var searchButton = document.getElementById('twitch-search-button');
+
+		//set up the search Button's onclick
+		searchButton.onclick = function() {
+
+			//start the http request
+			httpRequest(requestData.type, requestData.url).then(function(response){
+				console.log(response);
+			}, function (err) {
+				console.log(err);
+			});
+		};
+
+	}, false);
 
 })();
 //window.twitchStreamLoader;
