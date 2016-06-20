@@ -12,7 +12,8 @@
 
 		var requestPromise = new Promise(function(resolve, reject) {
 			var xmlHTTP = new XMLHttpRequest();
-			xmlHTTP.open(type, url + searchTerms, true);
+			var query = url + searchTerms + '&offset=25';
+			xmlHTTP.open(type, query, true);
 			xmlHTTP.onload = function() {
 				if(xmlHTTP.readyState === 4 && xmlHTTP.status === 200) {
 					resolve(JSON.parse(xmlHTTP.responseText));
@@ -31,9 +32,31 @@
 		return requestPromise;
 	};
 
+	function buildResultItem(item) {
+		//return the resulting element
+		var newVideoResult = document.createElement('div');
+		newVideoResult.className = 'twitch-video';
+		return newVideoResult;
+	};
+
+	function buildNextButton() {
+
+	};
+
+	function buildPrevButton() {
+
+	};
+
+	function buildHeader(element, results) {
+
+	};
+
 	//appends the results of the request to the results container
 	function appendResults(element, results) {
-
+		//build out a new div element for the results
+		results.forEach(stream => {
+			element.appendChild(buildResultItem(stream));
+		});
 	};
 
 	//initializes the app and sets up the events
@@ -48,6 +71,9 @@
 				//start the http request
 				httpRequest(requestData.type, requestData.url, searchTerm).then(function(response){
 					console.log(response);
+					//start building out the response
+					var resultsElem = document.getElementById('results');
+					appendResults(resultsElem, response.streams);
 				}, function (err) {
 					console.log(err);
 				});
