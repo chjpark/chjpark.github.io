@@ -44,17 +44,24 @@
 		var previewDiv = newElement('div', 'twitch-video-preview');
 		var infoDiv = newElement('div', 'twitch-video-info');
 
-		var imgElement = newElement('img', 'twitch-video-img');
-		imgElement.src = item.preview.small;
+		var imgElement = addPreviewImg(item.preview.medium);
 		previewDiv.appendChild(imgElement);
+
+		var title = newElement('h3');
+		title.textContent = item.channel.status;
+
+		infoDiv.appendChild(title);
 
 		newVideoResult.appendChild(previewDiv);
 		newVideoResult.appendChild(infoDiv);
 		return newVideoResult;
 	};
 
+	//creates a preview img element
 	function addPreviewImg(image) {
-
+		var imageElement = newElement('img', 'twitch-video-img');
+		imageElement.src = image;
+		return imageElement;
 	}
 
 	function buildNextButton() {
@@ -66,7 +73,9 @@
 	};
 
 	function buildHeader(element, results) {
-
+		var totalResults = newElement('span', 'twitch-total-results');
+		totalResults.textContent = 'Total results: ' + results;
+		element.appendChild(totalResults);
 	};
 
 	//appends the results of the request to the results container
@@ -98,7 +107,15 @@
 					console.log(response);
 					//start building out the response
 					var resultsElem = document.getElementById('results');
+					var resultsHeader = document.getElementById('header');
+
+					//clear out the results list and the results header
 					resultsElem.empty();
+					resultsHeader.empty();
+					//build the header
+					buildHeader(resultsHeader, response._total);
+
+					//build the results
 					appendResults(resultsElem, response.streams);
 				}, function (err) {
 					console.log(err);
