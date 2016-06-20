@@ -6,7 +6,7 @@
 		type: 'GET',
 		url: 'https://api.twitch.tv/kraken/search/streams?q='
 	};
-	
+
 	function httpRequest(type, url, searchTerms) {
 		//promise for asynchronously loading of data
 
@@ -31,7 +31,8 @@
 		return requestPromise;
 	};
 
-	function appendResults(results) {
+	//appends the results of the request to the results container
+	function appendResults(element, results) {
 
 	};
 
