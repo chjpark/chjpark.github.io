@@ -12,7 +12,8 @@
 
 		var requestPromise = new Promise(function(resolve, reject) {
 			var xmlHTTP = new XMLHttpRequest();
-			var query = url + searchTerms;
+			var search = searchTerms ? searchTerms : ''
+			var query = url + search;
 			xmlHTTP.open(type, query, true);
 			xmlHTTP.onload = function() {
 				if(xmlHTTP.readyState === 4 && xmlHTTP.status === 200) {
@@ -64,34 +65,74 @@
 		return imageElement;
 	}
 
-	function buildNextButton() {
-
+	HTMLElement.prototype.buildPager = function(links) {
+		var self = this;
+		var prevButton;
+		if(links.prev) {
+			prevButton = buildPagerButton(links.prev, 'prev');
+			self.appendChild(prevButton);
+		}
+		var nextButton = buildPagerButton(links.next, 'next');
+		self.appendChild(nextButton);
 	};
 
-	function buildPrevButton() {
+	function buildPagerButton(linkUrl, type) {
+		var button = newElement('div', type+'-button');
+		button.textContent = type === 'next' ? 'Next' : 'Prev';
 
+		//create an event to add a new page
+		button.onclick = function() {
+			httpRequest(requestData.type, linkUrl).then(function(response) {
+				createPageResults(response);
+			}, function(error){
+				console.log(error);
+			});
+		};
+
+		return button;
 	};
 
-	function buildHeader(element, results) {
+	HTMLElement.prototype.buildTotal = function(results) {
+		var self = this;
 		var totalResults = newElement('span', 'twitch-total-results');
-		totalResults.textContent = 'Total results: ' + results;
-		element.appendChild(totalResults);
+		totalResults.textContent = 'Total results: ' + results._total;
+
+		self.appendChild(totalResults);
 	};
 
 	//appends the results of the request to the results container
-	function appendResults(element, results) {
+	HTMLElement.prototype.appendResults = function(results) {
 		//build out a new div element for the results
+		var self = this;
 		results.forEach(stream => {
-			element.appendChild(buildResultItem(stream));
+			self.appendChild(buildResultItem(stream));
 		});
 	};
 
+	//HTMLElement prototype
 	HTMLElement.prototype.empty = function() {
 		var self = this;
 		while(self.hasChildNodes()) {
 			self.removeChild(self.lastChild);
 		}
-	}
+	};
+
+	function createPageResults(response) {
+		//start building out the response
+		var resultsElem = document.getElementById('results');
+		var resultsTotal = document.getElementById('total');
+		var resultsPager = document.getElementById('pager');
+
+		//clear out the results list and the results header
+		resultsElem.empty();
+		resultsTotal.empty();
+		resultsPager.empty();
+		//build the header
+		resultsTotal.buildTotal(response);
+		resultsPager.buildPager(response._links);
+		//build the results
+		resultsElem.appendResults(response.streams);
+	};
 
 	//initializes the app and sets up the events
 	function initialize() {
@@ -105,18 +146,7 @@
 				//start the http request
 				httpRequest(requestData.type, requestData.url, searchTerm).then(function(response){
 					console.log(response);
-					//start building out the response
-					var resultsElem = document.getElementById('results');
-					var resultsHeader = document.getElementById('header');
-
-					//clear out the results list and the results header
-					resultsElem.empty();
-					resultsHeader.empty();
-					//build the header
-					buildHeader(resultsHeader, response._total);
-
-					//build the results
-					appendResults(resultsElem, response.streams);
+					createPageResults(response);
 				}, function (err) {
 					console.log(err);
 				});
