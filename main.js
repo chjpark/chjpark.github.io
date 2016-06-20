@@ -12,7 +12,7 @@
 
 		var requestPromise = new Promise(function(resolve, reject) {
 			var xmlHTTP = new XMLHttpRequest();
-			var query = url + searchTerms + '&offset=25';
+			var query = url + searchTerms;
 			xmlHTTP.open(type, query, true);
 			xmlHTTP.onload = function() {
 				if(xmlHTTP.readyState === 4 && xmlHTTP.status === 200) {
@@ -32,12 +32,30 @@
 		return requestPromise;
 	};
 
+	function newElement(type, elementClass) {
+		var element = document.createElement(type);
+		element.className = elementClass;
+		return element;
+	};
+
 	function buildResultItem(item) {
 		//return the resulting element
-		var newVideoResult = document.createElement('div');
-		newVideoResult.className = 'twitch-video';
+		var newVideoResult = newElement('div', 'twitch-video');
+		var previewDiv = newElement('div', 'twitch-video-preview');
+		var infoDiv = newElement('div', 'twitch-video-info');
+
+		var imgElement = newElement('img', 'twitch-video-img');
+		imgElement.src = item.preview.small;
+		previewDiv.appendChild(imgElement);
+
+		newVideoResult.appendChild(previewDiv);
+		newVideoResult.appendChild(infoDiv);
 		return newVideoResult;
 	};
+
+	function addPreviewImg(image) {
+
+	}
 
 	function buildNextButton() {
 
@@ -59,6 +77,13 @@
 		});
 	};
 
+	HTMLElement.prototype.empty = function() {
+		var self = this;
+		while(self.hasChildNodes()) {
+			self.removeChild(self.lastChild);
+		}
+	}
+
 	//initializes the app and sets up the events
 	function initialize() {
 		window.addEventListener('load', function() {
@@ -73,6 +98,7 @@
 					console.log(response);
 					//start building out the response
 					var resultsElem = document.getElementById('results');
+					resultsElem.empty();
 					appendResults(resultsElem, response.streams);
 				}, function (err) {
 					console.log(err);
