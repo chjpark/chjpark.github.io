@@ -4,7 +4,7 @@
 	//request data to be passed into the httpRequest function
 	var requestData = {
 		type: 'GET',
-		url: 'https://api.twitch.tv/kraken/search/streams?q='
+		url: 'https://api.twitch.tv/kraken/search/streams?'
 	};
 
 	function httpRequest(type, url, searchTerms) {
@@ -12,14 +12,14 @@
 
 		var requestPromise = new Promise(function(resolve, reject) {
 			var xmlHTTP = new XMLHttpRequest();
-			var search = searchTerms ? searchTerms : ''
+			var search = searchTerms ? 'q=' + searchTerms : ''
 			var query = url + search;
 			xmlHTTP.open(type, query, true);
 			xmlHTTP.onload = function() {
 				if(xmlHTTP.readyState === 4 && xmlHTTP.status === 200) {
 					resolve(JSON.parse(xmlHTTP.responseText));
 				} else {
-					reject("Sorry, couldn't load videos!");
+					reject(JSON.parse(xmlHTTP.responseText));
 				}
 			}
 
@@ -43,19 +43,29 @@
 		//return the resulting element
 		var newVideoResult = newElement('div', 'twitch-video');
 		var previewDiv = newElement('div', 'twitch-video-preview');
-		var infoDiv = newElement('div', 'twitch-video-info');
+		var infoDiv = buildInfoDiv(item)
 
 		var imgElement = addPreviewImg(item.preview.medium);
 		previewDiv.appendChild(imgElement);
 
-		var title = newElement('h3');
-		title.textContent = item.channel.status;
-
-		infoDiv.appendChild(title);
-
 		newVideoResult.appendChild(previewDiv);
 		newVideoResult.appendChild(infoDiv);
 		return newVideoResult;
+	};
+
+	function buildInfoDiv(info) {
+		var infoDiv = newElement('div', 'twitch-video-info');
+		var title = newElement('h3');
+		var game = newElement('span', 'twitch-game');
+		game.textContent = info.game + ' - ' + info.viewers + ' viewers';
+		title.textContent = info.channel.status;
+		var description = newElement('span', 'twitch-game-description');
+		description.textContent = info.channel.description ? info.channel.description : 'No description';
+
+		infoDiv.appendChild(title);
+		infoDiv.appendChild(game);
+		infoDiv.appendChild(description);
+		return infoDiv;
 	};
 
 	//creates a preview img element
@@ -63,8 +73,9 @@
 		var imageElement = newElement('img', 'twitch-video-img');
 		imageElement.src = image;
 		return imageElement;
-	}
+	};
 
+	//builds pager in the element
 	HTMLElement.prototype.buildPager = function(links) {
 		var self = this;
 		var prevButton;
@@ -76,6 +87,7 @@
 		self.appendChild(nextButton);
 	};
 
+	//helper method for buildPager
 	function buildPagerButton(linkUrl, type) {
 		var button = newElement('div', type+'-button');
 		button.textContent = type === 'next' ? 'Next' : 'Prev';
@@ -92,6 +104,7 @@
 		return button;
 	};
 
+	//shows the buildTotal
 	HTMLElement.prototype.buildTotal = function(results) {
 		var self = this;
 		var totalResults = newElement('span', 'twitch-total-results');
@@ -118,6 +131,7 @@
 	};
 
 	function createPageResults(response) {
+		console.log(response);
 		//start building out the response
 		var resultsElem = document.getElementById('results');
 		var resultsTotal = document.getElementById('total');
@@ -129,9 +143,11 @@
 		resultsPager.empty();
 		//build the header
 		resultsTotal.buildTotal(response);
-		resultsPager.buildPager(response._links);
-		//build the results
-		resultsElem.appendResults(response.streams);
+		if(response.streams.length) {
+			resultsPager.buildPager(response._links);
+			//build the results
+			resultsElem.appendResults(response.streams);
+		}
 	};
 
 	//initializes the app and sets up the events
@@ -145,10 +161,9 @@
 
 				//start the http request
 				httpRequest(requestData.type, requestData.url, searchTerm).then(function(response){
-					console.log(response);
 					createPageResults(response);
 				}, function (err) {
-					console.log(err);
+					//create a switch here
 				});
 			};
 
