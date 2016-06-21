@@ -12,14 +12,14 @@ body {
 }
 
 /*buttons*/
-.twitch-search-container button {
+button {
 	cursor: pointer;
 	font-size: inherit;
 	padding: 5px 10px;
 	margin: 0 10px 0 10px;
 	border: none;
 	color: white;
-	background-color: purple;
+	background-color: blueviolet;
 }
 
 /*input*/
@@ -33,6 +33,7 @@ body {
 */
 .twitch-results-header {
 	display: flex;
+	justify-content: space-between;
 }
 
 .twitch-results-header .twitch-pager {
@@ -40,7 +41,7 @@ body {
 }
 
 .twitch-results-container {
-	margin: 20px 0 0 0;
+	padding: 30px 0 0 0;
 }
 
 .twitch-video {
@@ -69,7 +70,7 @@ body {
 
 /*iphone5 and iphone5+*/
 @media only screen and (min-device-width: 320px) and (max-device-width: 568px) {
-	
+
 	.twitch-stream-container {
 		width: 90%;
 		margin: 0 5% 0 5%;
@@ -82,9 +83,19 @@ body {
 		font-size: inherit;
 	}
 
-	.twitch-search-container button {
+	.twitch-results-body {
+		padding: 30px 0 0 0;
+	}
+
+	button {
 		cursor: pointer;
 		padding: 5px 10px;
 		margin: 0 50px 0 50px;
+	}
+
+	.twitch-pager button {
+		cursor: pointer;
+		padding: 5px 10px;
+		margin: 0 10px 0 10px;
 	}
 }
