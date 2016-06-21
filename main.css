@@ -2,10 +2,40 @@ body {
 	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
 }
 
+.twitch-stream-container {
+	width: 60%;
+	margin: 0 20% 0 20%;
+}
+
+.twitch-search-container {
+	width: inherit;
+	transform: translateY(-50%);
+}
+
+.twitch-results-header {
+	width: inherit;
+	display: flex;
+}
+
+.twitch-results-header .twitch-pager {
+	float: right;
+}
+
+.twitch-results-container {
+	position: absolute;
+	width: inherit;
+}
+
 .twitch-video {
 	display: flex;
+	padding: 10px 0 10px 0;
 }
 .twitch-video .twitch-video-info {
 	display: flex;
 	flex-direction: column;
+	padding: 0 0 0 10px;
+}
+
+.twitch-video .twitch-video-info h3 {
+	margin: 0;
 }
