@@ -2,7 +2,10 @@ body {
 	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
 }
 
-.twitch-video-info {
+.twitch-video {
+	display: flex;
+}
+.twitch-video .twitch-video-info {
 	display: flex;
 	flex-direction: column;
 }

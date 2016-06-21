@@ -7,6 +7,10 @@
 		url: 'https://api.twitch.tv/kraken/search/streams?'
 	};
 
+	var settings = {
+		currentPage: 1
+	};
+
 	function httpRequest(type, url, searchTerms) {
 		//promise for asynchronously loading of data
 
@@ -78,13 +82,19 @@
 	};
 
 	//builds pager in the element
-	HTMLElement.prototype.buildPager = function(links) {
+	HTMLElement.prototype.buildPager = function(links, total) {
 		var self = this;
 		var prevButton;
 		if(links.prev) {
 			prevButton = buildPagerButton(links.prev, 'prev');
 			self.appendChild(prevButton);
 		}
+
+		//build current page div
+		var pageTracker = newElement('span', 'page-tracker');
+		pageTracker.textContent = settings.currentPage + " / " + Math.ceil(total/10);
+
+		self.appendChild(pageTracker);
 		var nextButton = buildPagerButton(links.next, 'next');
 		self.appendChild(nextButton);
 	};
@@ -97,6 +107,11 @@
 		//create an event to add a new page
 		button.onclick = function() {
 			httpRequest(requestData.type, linkUrl).then(function(response) {
+				if(button.textContent == 'Next') {
+					settings.currentPage += 1;
+				} else {
+					settings.currentPage -= 1;
+				}
 				createPageResults(response);
 			}, function(error){
 				console.log(error);
@@ -146,7 +161,7 @@
 		//build the header
 		resultsTotal.buildTotal(response);
 		if(response.streams.length) {
-			resultsPager.buildPager(response._links);
+			resultsPager.buildPager(response._links, response._total);
 			//build the results
 			resultsElem.appendResults(response.streams);
 		}
