@@ -35,7 +35,9 @@
 
 	function newElement(type, elementClass) {
 		var element = document.createElement(type);
-		element.className = elementClass;
+		if(elementClass) {
+			element.className = elementClass;
+		}
 		return element;
 	};
 
@@ -89,7 +91,7 @@
 
 	//helper method for buildPager
 	function buildPagerButton(linkUrl, type) {
-		var button = newElement('div', type+'-button');
+		var button = newElement('button', type+'-button');
 		button.textContent = type === 'next' ? 'Next' : 'Prev';
 
 		//create an event to add a new page
@@ -163,7 +165,12 @@
 				httpRequest(requestData.type, requestData.url, searchTerm).then(function(response){
 					createPageResults(response);
 				}, function (err) {
-					//create a switch here
+					switch(err.status) {
+						case '400':
+							break;
+						default:
+							break;	
+					}
 				});
 			};
 
