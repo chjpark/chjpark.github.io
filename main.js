@@ -95,8 +95,10 @@
 		pageTracker.textContent = settings.currentPage + " / " + Math.ceil(total/10);
 
 		self.appendChild(pageTracker);
-		var nextButton = buildPagerButton(links.next, 'next');
-		self.appendChild(nextButton);
+		if(settings.currentPage < Math.ceil(total/10)) {
+			var nextButton = buildPagerButton(links.next, 'next');
+			self.appendChild(nextButton);
+		}
 	};
 
 	//helper method for buildPager
