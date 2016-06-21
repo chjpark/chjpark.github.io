@@ -175,17 +175,22 @@
 			//set up the search Button's onclick
 			searchButton.onclick = function() {
 				var searchTerm = document.getElementById('search-term').value;
-
+				settings.currentPage = 1;
 				//start the http request
 				httpRequest(requestData.type, requestData.url, searchTerm).then(function(response){
 					createPageResults(response);
 				}, function (err) {
+					var errorElement = newElement('span', 'error');
 					switch(err.status) {
 						case '400':
+							errorElement.textContent = 'No search results. Please try again.';
 							break;
 						default:
+							errorElement.textContent = 'No results';
 							break;	
 					}
+					var resultsList = document.getElementById('results');
+					results.appendChild(errorElement);
 				});
 			};
 
