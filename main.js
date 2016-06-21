@@ -64,7 +64,8 @@
 		var title = newElement('h3');
 		var game = newElement('span', 'twitch-game');
 		game.textContent = info.game + ' - ' + info.viewers + ' viewers';
-		title.textContent = info.channel.status;
+		var infoTitle = info.channel.status.length > 25 ? info.channel.status.slice(0, 25) + '...' : info.channel.status;
+		title.textContent = infoTitle;
 		var description = newElement('span', 'twitch-game-description');
 		description.textContent = info.channel.description ? info.channel.description : 'No description';
 
