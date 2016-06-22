@@ -6,11 +6,9 @@
 		url: 'https://api.twitch.tv/kraken/search/streams?'
 	};
 
-	var settings = {
-		currentPage: 1
-	};
+	var currentPage = 1;
 
-	function httpRequest(url, searchTerms) {
+	function jsonpRequest(url, searchTerms) {
 		//promise for asynchronously loading of data
 		var requestPromise = new Promise(function(resolve, reject) {
 			var head = document.head;
@@ -24,15 +22,14 @@
 			}
 
 			//set up JSONP requests
-			var urlString = url;
 			if(searchTerms) {
-				urlString += 'q=' + searchTerms;
+				url += 'q=' + searchTerms;
 			}
-			urlString += '&callback=getResponse';
+			url += '&callback=getResponse';
 
 			var scriptTag = document.createElement('script');
 			scriptTag.type = 'text/javascript';
-			scriptTag.src = urlString;
+			scriptTag.src = url;
 			head.appendChild(scriptTag);
 			head.removeChild(scriptTag);
 		});
@@ -96,10 +93,10 @@
 		}
 
 		//build current page div
-		var pageTracker = newElement('span', 'page-tracker', settings.currentPage + " / " + Math.ceil(total/10));
+		var pageTracker = newElement('span', 'page-tracker', currentPage + " / " + Math.ceil(total/10));
 
 		self.appendChild(pageTracker);
-		if(settings.currentPage < Math.ceil(total/10)) {
+		if(currentPage < Math.ceil(total/10)) {
 			var nextButton = buildPagerButton(links.next, 'next');
 			self.appendChild(nextButton);
 		}
@@ -111,11 +108,11 @@
 
 		//create an event to add a new page
 		button.onclick = function() {
-			httpRequest(linkUrl).then(function(response) {
+			jsonpRequest(linkUrl).then(function(response) {
 				if(button.textContent == 'Next') {
-					settings.currentPage += 1;
+					currentPage += 1;
 				} else {
-					settings.currentPage -= 1;
+					currentPage -= 1;
 				}
 				createPageResults(response);
 			}, function(error){
@@ -158,6 +155,7 @@
 
 	function createPageResults(response) {
 		//start building out the response
+		console.log(response);
 		var resultsElem = document.getElementById('results');
 		var resultsTotal = document.getElementById('total');
 		var resultsPager = document.getElementById('pager');
@@ -178,9 +176,9 @@
 		//set up the search Button's onclick
 		searchButton.onclick = function() {
 			var searchTerm = document.getElementById('search-term').value;
-			settings.currentPage = 1;
+			currentPage = 1;
 			//start the http request
-			httpRequest(requestData.url, searchTerm).then(function(response){
+			jsonpRequest(requestData.url, searchTerm).then(function(response){
 				createPageResults(response);
 			}, function (err) {
 				var resultsElem = document.getElementById('results');
