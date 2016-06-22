@@ -63,7 +63,7 @@
 	};
 
 	function buildInfoDiv(info) {
-		var infoTitle = info.channel.status.length > 25 ? info.channel.status.slice(0, 25) + '...' : info.channel.status;
+		var infoTitle = info.channel.status;
 		var infoDiv = newElement('div', 'twitch-video-info');
 		var title = newElement('h3', '', infoTitle);
 		var game = newElement('span', 'twitch-game', info.game + ' - ' + info.viewers + ' viewers');
@@ -155,7 +155,6 @@
 
 	function createPageResults(response) {
 		//start building out the response
-		console.log(response);
 		var resultsElem = document.getElementById('results');
 		var resultsTotal = document.getElementById('total');
 		var resultsPager = document.getElementById('pager');
