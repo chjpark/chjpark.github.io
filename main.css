@@ -61,7 +61,7 @@ button {
 /* media queries */
 
 /*ipad*/
-@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) and (-webkit-min-device-pixel-ratio: 1){
 	.twitch-stream-container {
 		width: 90%;
 		margin: 0 5% 0 5%;
@@ -97,5 +97,20 @@ button {
 		cursor: pointer;
 		padding: 5px 10px;
 		margin: 0 10px 0 10px;
+	}
+}
+
+/*iphone 6 and iphone6 + */
+@media only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 2) { 
+	.twitch-stream-container {
+		width: 90%;
+		margin: 0 5%;
+		font-size: 2em;
+	}
+
+	.twitch-search-container input {
+		width: 40%;
+		height:	70px;
+		font-size: 1.5em;
 	}
 }
