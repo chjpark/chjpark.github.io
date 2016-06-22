@@ -72,8 +72,8 @@ button {
 @media only screen and (min-device-width: 320px) and (max-device-width: 568px) and (-webkit-min-device-pixel-ratio: 2){
 
 	.twitch-stream-container {
-		width: 90%;
-		margin: 0 5%;
+		width: 95%;
+		margin: 0 2.5%;
 		font-size: 2em;
 	}
 
@@ -103,8 +103,8 @@ button {
 /*iphone 6 and iphone6 + */
 @media only screen and (min-device-width: 414px) and (max-device-width: 736px) and (-webkit-min-device-pixel-ratio: 2) { 
 	.twitch-stream-container {
-		width: 90%;
-		margin: 0 5%;
+		width: 95%;
+		margin: 0 2.5%;
 		font-size: 2em;
 	}
 
