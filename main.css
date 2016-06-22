@@ -73,13 +73,12 @@ button {
 
 	.twitch-stream-container {
 		width: 90%;
-		margin: 0 5% 0 5%;
-		font-size: 2em;
+		margin: 0;
 	}
 
 	.twitch-search-container input {
-		width: 40%;
-		height:	50px;
+		/*width: 40%;
+		height:	50px;*/
 		font-size: inherit;
 	}
 

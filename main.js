@@ -3,7 +3,6 @@
 (function() {
 	//request data to be passed into the httpRequest function
 	var requestData = {
-		type: 'GET',
 		url: 'https://api.twitch.tv/kraken/search/streams?'
 	};
 
@@ -11,36 +10,43 @@
 		currentPage: 1
 	};
 
-	function httpRequest(type, url, searchTerms) {
+	function httpRequest(url, searchTerms) {
 		//promise for asynchronously loading of data
-
 		var requestPromise = new Promise(function(resolve, reject) {
-			var xmlHTTP = new XMLHttpRequest();
-			var search = searchTerms ? 'q=' + searchTerms : ''
-			var query = url + search;
-			xmlHTTP.open(type, query, true);
-			xmlHTTP.onload = function() {
-				if(xmlHTTP.readyState === 4 && xmlHTTP.status === 200) {
-					resolve(JSON.parse(xmlHTTP.responseText));
+			var head = document.head;
+
+			window.getResponse = function(response) {
+				if(response.error) {
+					reject(response);
 				} else {
-					reject(JSON.parse(xmlHTTP.responseText));
+					resolve(response);
 				}
 			}
 
-			xmlHTTP.onerror = function() {
-				reject(Error('network errors!'));
+			//set up JSONP requests
+			var urlString = url;
+			if(searchTerms) {
+				urlString += 'q=' + searchTerms;
 			}
-		
-			xmlHTTP.send();
+			urlString += '&callback=getResponse';
+
+			var scriptTag = document.createElement('script');
+			scriptTag.type = 'text/javascript';
+			scriptTag.src = urlString;
+			head.appendChild(scriptTag);
+			head.removeChild(scriptTag);
 		});
 
 		return requestPromise;
 	};
 
-	function newElement(type, elementClass) {
+	function newElement(type, elementClass, text) {
 		var element = document.createElement(type);
 		if(elementClass) {
 			element.className = elementClass;
+		} 
+		if(text) {
+			element.textContent = text;
 		}
 		return element;
 	};
@@ -60,14 +66,12 @@
 	};
 
 	function buildInfoDiv(info) {
-		var infoDiv = newElement('div', 'twitch-video-info');
-		var title = newElement('h3');
-		var game = newElement('span', 'twitch-game');
-		game.textContent = info.game + ' - ' + info.viewers + ' viewers';
 		var infoTitle = info.channel.status.length > 25 ? info.channel.status.slice(0, 25) + '...' : info.channel.status;
-		title.textContent = infoTitle;
-		var description = newElement('span', 'twitch-game-description');
-		description.textContent = info.channel.description ? info.channel.description : 'No description';
+		var infoDiv = newElement('div', 'twitch-video-info');
+		var title = newElement('h3', '', infoTitle);
+		var game = newElement('span', 'twitch-game', info.game + ' - ' + info.viewers + ' viewers');
+
+		var description = newElement('span', 'twitch-game-description', info.channel.description ? info.channel.description : 'No description');
 
 		infoDiv.appendChild(title);
 		infoDiv.appendChild(game);
@@ -92,8 +96,7 @@
 		}
 
 		//build current page div
-		var pageTracker = newElement('span', 'page-tracker');
-		pageTracker.textContent = settings.currentPage + " / " + Math.ceil(total/10);
+		var pageTracker = newElement('span', 'page-tracker', settings.currentPage + " / " + Math.ceil(total/10));
 
 		self.appendChild(pageTracker);
 		if(settings.currentPage < Math.ceil(total/10)) {
@@ -104,12 +107,11 @@
 
 	//helper method for buildPager
 	function buildPagerButton(linkUrl, type) {
-		var button = newElement('button', type+'-button');
-		button.textContent = type === 'next' ? 'Next' : 'Prev';
+		var button = newElement('button', type+'-button', type === 'next' ? 'Next' : 'Prev');
 
 		//create an event to add a new page
 		button.onclick = function() {
-			httpRequest(requestData.type, linkUrl).then(function(response) {
+			httpRequest(linkUrl).then(function(response) {
 				if(button.textContent == 'Next') {
 					settings.currentPage += 1;
 				} else {
@@ -126,11 +128,8 @@
 
 	//shows the buildTotal
 	HTMLElement.prototype.buildTotal = function(results) {
-		var self = this;
-		var totalResults = newElement('span', 'twitch-total-results');
-		totalResults.textContent = 'Total results: ' + results._total;
-
-		self.appendChild(totalResults);
+		var totalResults = newElement('span', 'twitch-total-results', 'Total results: ' + results._total);
+		this.appendChild(totalResults);
 	};
 
 	//appends the results of the request to the results container
@@ -150,20 +149,22 @@
 		}
 	};
 
+	function clearResults(elementArr) {
+		//clear out the results list and the results header
+		elementArr.forEach(elem => {
+			elem.empty();
+		});
+	}
+
 	function createPageResults(response) {
-		console.log(response);
 		//start building out the response
 		var resultsElem = document.getElementById('results');
 		var resultsTotal = document.getElementById('total');
 		var resultsPager = document.getElementById('pager');
-
-		//clear out the results list and the results header
-		resultsElem.empty();
-		resultsTotal.empty();
-		resultsPager.empty();
+		clearResults([resultsElem, resultsTotal, resultsPager]);
 		//build the header
 		resultsTotal.buildTotal(response);
-		if(response.streams.length) {
+		if(response.streams.length > 0) {
 			resultsPager.buildPager(response._links, response._total);
 			//build the results
 			resultsElem.appendResults(response.streams);
@@ -171,35 +172,25 @@
 	};
 
 	//initializes the app and sets up the events
-	function initialize() {
-		window.addEventListener('load', function() {
-			var searchButton = document.getElementById('twitch-search-button');
+	window.addEventListener('load', function() {
+		var searchButton = document.getElementById('twitch-search-button');
 
-			//set up the search Button's onclick
-			searchButton.onclick = function() {
-				var searchTerm = document.getElementById('search-term').value;
-				settings.currentPage = 1;
-				//start the http request
-				httpRequest(requestData.type, requestData.url, searchTerm).then(function(response){
-					createPageResults(response);
-				}, function (err) {
-					var errorElement = newElement('span', 'error');
-					switch(err.status) {
-						case '400':
-							errorElement.textContent = 'No search results. Please try again.';
-							break;
-						default:
-							errorElement.textContent = 'No results';
-							break;	
-					}
-					var resultsList = document.getElementById('results');
-					results.appendChild(errorElement);
-				});
-			};
+		//set up the search Button's onclick
+		searchButton.onclick = function() {
+			var searchTerm = document.getElementById('search-term').value;
+			settings.currentPage = 1;
+			//start the http request
+			httpRequest(requestData.url, searchTerm).then(function(response){
+				createPageResults(response);
+			}, function (err) {
+				var resultsElem = document.getElementById('results');
+				var resultsTotal = document.getElementById('total');	
+				var resultsPager = document.getElementById('pager');
+				clearResults([resultsElem, resultsTotal, resultsPager]);
 
-		}, false);
-	};
-
-	initialize();
+				var errorElement = newElement('span', 'error', 'Please enter search terms and try again.');
+				results.appendChild(errorElement);
+			});
+		};
+	}, false);
 })();
-//window.twitchStreamLoader;
